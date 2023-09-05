@@ -1,5 +1,5 @@
 .PHONY: all jupyter pause address containers list-containers stop-containers \
-        restart-containers clear-nb clean
+        restart-containers tests pytest black flake8 mypyp shell clear-nb clean
 
 # Usage:
 # make                    # just alias to containers command
@@ -10,6 +10,12 @@
 # make list-containers    # list all running containers
 # make stop-containers    # simply stops all running Docker containers
 # make restart-containers # restart all containers
+# make tests              # run full testing suite
+# make pytest             # run pytest in docker container
+# make black              # run black in docker container
+# make flake8             # run flake8 in docker container
+# make mypy               # run mypy in docker container
+# make shell              # create interactive shell in docker container
 # make clear-nb           # simply clears Jupyter notebook output
 # make clean              # combines all clearing commands into one
 
@@ -29,7 +35,8 @@ NOTEBOOKS  := $(shell find ${INTDR} -name "*.ipynb" -not -path "*/.ipynb_*/*")
 # docker-related variables
 JPTCTNR = jupyter.${DCTNR}
 DCKRIMG = ghcr.io/ragingtiger/nomad:master
-DCKRRUN = docker run --rm -v ${CURRENTDIR}:/home/jovyan -it ${DCKRIMG}
+JPTRSRV = docker run --rm -v ${CURRENTDIR}:/home/jovyan -it ${DCKRIMG}
+DCKRTST = docker run --rm -v ${CURRENTDIR}:/usr/local/src/nomad -it ${DCKRIMG}
 
 # jupyter nbconvert vars
 NBCLER = jupyter nbconvert --clear-output --inplace
@@ -113,10 +120,33 @@ stop-containers:
 # restart all containers
 restart-containers: stop-containers containers
 
+# run full testing suite
+tests: pytest black flake8 mypy
+
+# run pytest in docker container
+pytest:
+	@ ${DCKRTST} pytest
+
+# run black in docker container
+black:
+	@ ${DCKRTST} black src/ tests/
+
+# run flake8 in docker container
+flake8:
+	@ ${DCKRTST} flake8
+
+# run mypy in docker container
+mypy:
+	@ ${DCKRTST} mypy src/ tests/
+
+# create interactive shell in docker container
+shell:
+	@ ${DCKRTST} bash
+
 # remove output from executed notebooks
 clear-nb:
 	@ echo "Removing all output from Jupyter notebooks."
-	@ ${DCKRRUN} ${NBCLER} ${NOTEBOOKS}
+	@ ${JPTRSRV} ${NBCLER} ${NOTEBOOKS}
 
 # cleanup everything
 clean: clear-nb
