@@ -28,7 +28,7 @@ NOTEBOOKS  := $(shell find ${INTDR} -name "*.ipynb" -not -path "*/.ipynb_*/*")
 
 # docker-related variables
 JPTCTNR = jupyter.${DCTNR}
-DCKRIMG = ghcr.io/RagingTiger/nomad:master
+DCKRIMG = ghcr.io/ragingtiger/nomad:master
 DCKRRUN = docker run --rm -v ${CURRENTDIR}:/home/jovyan -it ${DCKRIMG}
 
 # jupyter nbconvert vars
