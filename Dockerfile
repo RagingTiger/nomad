@@ -1,5 +1,5 @@
 # jupyter base image
-FROM jupyter/scipy-notebook:lab-3.6.3
+FROM jupyter/scipy-notebook:lab-4.0.5
 
 # first turn off git safe.directory
 RUN git config --global safe.directory '*'
