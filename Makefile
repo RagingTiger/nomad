@@ -1,5 +1,5 @@
 .PHONY: all jupyter pause address containers list-containers stop-containers \
-        restart-containers tests pytest isort black flake8 mypyp shell clear-nb clean
+        restart-containers tests pytest isort black flake8 mypy shell clear-nb clean
 
 # Usage:
 # make                    # just alias to containers command
