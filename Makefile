@@ -1,5 +1,5 @@
 .PHONY: all jupyter pause address containers list-containers stop-containers \
-        restart-containers tests pytest black flake8 mypyp shell clear-nb clean
+        restart-containers tests pytest isort black flake8 mypyp shell clear-nb clean
 
 # Usage:
 # make                    # just alias to containers command
@@ -12,6 +12,7 @@
 # make restart-containers # restart all containers
 # make tests              # run full testing suite
 # make pytest             # run pytest in docker container
+# make isort              # run isort in docker container
 # make black              # run black in docker container
 # make flake8             # run flake8 in docker container
 # make mypy               # run mypy in docker container
@@ -121,11 +122,15 @@ stop-containers:
 restart-containers: stop-containers containers
 
 # run full testing suite
-tests: pytest black flake8 mypy
+tests: pytest isort black flake8 mypy
 
 # run pytest in docker container
 pytest:
 	@ ${DCKRTST} pytest
+
+# run isort in docker container
+isort:
+	@ ${DCKRTST} isort src/ tests/
 
 # run black in docker container
 black:
