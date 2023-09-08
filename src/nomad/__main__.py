@@ -6,8 +6,11 @@ import click
 import osmnx
 
 
+# globals
+NOMAD_CACHE_DIR = "./.nomad/osmnx/cache"
+
 # configure settings for nomad
-osmnx.settings.cache_folder = "./.nomad/osmnx/cache"
+osmnx.settings.cache_folder = NOMAD_CACHE_DIR
 
 
 @click.group(invoke_without_command=True, no_args_is_help=True)
@@ -72,6 +75,44 @@ def geocode(ctx: click.Context, cache: bool, pretty_print: bool, location: str) 
 
     # show
     print(result)
+
+
+@main.command(
+    "download",
+    no_args_is_help=True,
+    short_help="Download GIS data from various sources.",
+)
+@click.option(
+    "-d",
+    "--download-dir",
+    type=click.Path(),
+    default=NOMAD_CACHE_DIR,
+    show_default=True,
+    help="Path to GIS download directory.",
+)
+@click.argument("location", type=str)
+@click.pass_context
+def download(
+    ctx: click.Context,
+    download_dir: str,
+    location: str,
+) -> None:
+    """Download GIS data from various sources for a given location."""
+    # get dry_run and debug info if any
+    dry_run, debug = sync_main_flags(ctx)
+
+    # setting directory path/name
+    osmnx.settings.cache_folder = download_dir
+
+    # download
+    try:
+        response = osmnx._nominatim._download_nominatim_element(location)
+        full_name = response[0]["display_name"]
+    except IndexError:
+        sys.exit(f"Location {location!r} could not be found.")
+
+    # results
+    print(f"Location {full_name:!r} successfully downloaded to: {download_dir}.")
 
 
 if __name__ == "__main__":
