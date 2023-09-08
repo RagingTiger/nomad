@@ -146,7 +146,7 @@ mypy:
 
 # create interactive shell in docker container
 shell:
-	@ ${DCKRTST} bash
+	@ ${DCKRTST} bash || true
 
 # remove output from executed notebooks
 clear-nb:
