@@ -17,6 +17,7 @@ Changelog = "https://github.com/RagingTiger/nomad/releases"
 [tool.poetry.dependencies]
 python = "^3.9"
 click = ">=8.0.1"
+osmnx = ">=1.6.0"
 
 [tool.poetry.group.dev]
 optional = true
