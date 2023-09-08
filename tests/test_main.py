@@ -2,6 +2,7 @@
 from typing import Optional
 from typing import Tuple
 
+import osmnx
 import pytest
 from click.testing import CliRunner
 from click.testing import Result
@@ -56,3 +57,8 @@ def test_help_by_default_succeeds(
 
     # check usage message printed
     assert "Usage" in result.output
+
+
+def test_default_cache_dir() -> None:
+    """Sanity check for default caching directory."""
+    assert osmnx.settings.cache_folder == __main__.NOMAD_CACHE_DIR
