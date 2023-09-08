@@ -112,7 +112,7 @@ def download(
         sys.exit(f"Location {location!r} could not be found.")
 
     # results
-    print(f"Location {full_name:!r} successfully downloaded to: {download_dir}.")
+    print(f"Location {full_name!r} successfully downloaded to: {download_dir}.")
 
 
 if __name__ == "__main__":
