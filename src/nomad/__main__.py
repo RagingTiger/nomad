@@ -213,5 +213,52 @@ def search_cache(ctx: click.Context, query: str) -> None:
             print(title + contents)
 
 
+@cache.command(
+    "rm",
+    no_args_is_help=False,
+    short_help="Remove select cached data from cache directory.",
+)
+@click.option("-e", "--empty", is_flag=True, help="Toggle remove empty cache.")
+@click.option("-f", "--force", is_flag=True, help="Toggle no prompt before deleting.")
+@click.pass_context
+def remove_cache(ctx: click.Context, empty: bool, force: bool) -> None:
+    """Remove select cached data from cache directory."""
+    # check if empty is toggled
+    if not empty:
+        scope = "all cached data"
+        cache_gen = get_cache_data(filter_func=lambda x: True)
+
+    else:
+        scope = "only empty JSON cached data"
+        cache_gen = get_cache_data()
+
+    # control flow
+    if not force:
+        # safety check
+        if click.confirm(f"Do you want to delete {scope}?", abort=True):
+            # notify user
+            print("Confirmed. Now deleting ...")
+
+            # print out selected cache data
+            for data_path, _ in cache_gen:
+                # unlink/delete the file
+                data_path.unlink()
+
+                # notify
+                print(f"Deleted: {data_path}")
+
+    else:
+        # no safety check
+        print("Now deleting ...")
+
+        # print out selected cache data
+        for data_path, _ in cache_gen:
+            # unlink/delete the file
+            data_path.unlink()
+
+            # notify
+            print(f"Deleted: {data_path}")
+
+
 if __name__ == "__main__":
     main(prog_name="nomad")  # pragma: no cover
