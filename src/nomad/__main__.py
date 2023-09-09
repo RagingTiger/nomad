@@ -1,5 +1,10 @@
 """Command-line interface."""
+import json
+import pathlib
 import sys
+from typing import Any
+from typing import Generator
+from typing import List
 from typing import Tuple
 
 import click
@@ -113,6 +118,65 @@ def download(
 
     # results
     print(f"Location {full_name!r} successfully downloaded to: {download_dir}.")
+
+
+@main.group(
+    "cache",
+    no_args_is_help=True,
+    short_help="Manage GIS data cache.",
+)
+@click.pass_context
+def cache(ctx: click.Context) -> None:
+    """Manage GIS data cache."""
+    pass
+
+
+def get_cache_data(
+    cache_dir: str = NOMAD_CACHE_DIR,
+) -> Generator[Tuple[pathlib.Path, List[Any]], None, None]:
+    """Get all GIS JSON data from files in cache directory."""
+    # get pathlib obj of cache data dir
+    cache_path_obj = pathlib.Path(cache_dir)
+
+    # iterate through files
+    for data_path in cache_path_obj.glob("**/*.json"):
+        # open file
+        with open(data_path, encoding="utf8") as data_file:
+            # generate dict of JSON data
+            yield (data_path, json.load(data_file))
+
+
+@cache.command(
+    "inspect",
+    no_args_is_help=False,
+    short_help="Inspect the contents of the GIS data cache directory.",
+)
+@click.pass_context
+def inspect_cache(ctx: click.Context) -> None:
+    """Inspect contents of GIS data cache directory."""
+    for data_path, data_list in get_cache_data():
+        # attempt to load
+        try:
+            # load it using json method
+            data = data_list[0]
+
+            # create title/contents for inspection dump case
+            title = f"Inspecting contents of cached file: {data_path}\n"
+            contents = ""
+
+            # loop over key/value pairs
+            for key, value in data.items():
+                # check type is not a list
+                if type(value) not in {dict, list}:
+                    # append key/value to contents
+                    contents += f"{key:<12} {value}\n"
+
+            # one final newline
+            print(title + contents)
+
+        except IndexError:
+            # just an empty JSON file because query failed
+            pass
 
 
 if __name__ == "__main__":
