@@ -5,8 +5,8 @@ import re
 import sys
 from typing import Any
 from typing import Callable
+from typing import Dict
 from typing import Generator
-from typing import List
 from typing import Tuple
 
 import click
@@ -110,16 +110,20 @@ def download(
 
     # setting directory path/name
     osmnx.settings.cache_folder = download_dir
+    osmnx.settings.cache_only_mode = True
 
     # download
     try:
-        response = osmnx._nominatim._download_nominatim_element(location)
-        full_name = response[0]["display_name"]
-    except IndexError:
-        sys.exit(f"Location {location!r} could not be found.")
+        osmnx.graph_from_place(location)
 
-    # results
-    print(f"Location {full_name!r} successfully downloaded to: {download_dir}.")
+    # succesfully cached
+    except osmnx._errors.CacheOnlyInterruptError:
+        # results
+        print(f"Location {location} successfully downloaded to: {download_dir}.")
+
+    # cannot be found
+    except osmnx._errors.InsufficientResponseError:
+        sys.exit(f"Location {location!r} could not be found.")
 
 
 @main.group(
@@ -136,7 +140,7 @@ def cache(ctx: click.Context) -> None:
 def get_cache_data(
     cache_dir: str = NOMAD_CACHE_DIR,
     filter_func: Callable[[Any], bool] = lambda x: len(x) != 0,
-) -> Generator[Tuple[pathlib.Path, List[Any]], None, None]:
+) -> Generator[Tuple[pathlib.Path, Dict[str, Any]], None, None]:
     """Get all GIS JSON data from files in cache directory."""
     # get pathlib obj of cache data dir
     cache_path_obj = pathlib.Path(cache_dir)
@@ -150,8 +154,11 @@ def get_cache_data(
 
             # filter out
             if filter_func(json_data):
+                # if list get inner dictionary
+                json_dict = json_data[0] if isinstance(json_data, list) else json_data
+
                 # generate dict of JSON data
-                yield (data_path, json_data)
+                yield (data_path, json_dict)
 
 
 @cache.command(
@@ -163,10 +170,7 @@ def get_cache_data(
 def inspect_cache(ctx: click.Context) -> None:
     """Inspect contents of GIS data cache directory."""
     # loop over data a filter it
-    for data_path, data_list in get_cache_data():
-        # load it using json method
-        data = data_list[0]
-
+    for data_path, data in get_cache_data():
         # create title/contents for inspection dump case
         title = f"{'file_path':<12} {data_path}\n"
         contents = ""
@@ -192,10 +196,7 @@ def inspect_cache(ctx: click.Context) -> None:
 def search_cache(ctx: click.Context, query: str) -> None:
     """Search through JSON data in GIS data cache directory."""
     # iterate through files
-    for data_path, data_list in get_cache_data():
-        # load it using json method
-        data = data_list[0]
-
+    for data_path, data in get_cache_data():
         # create title/contents for inspection dump case
         title = f"{'file_path':<12} {data_path}\n"
         contents = ""
