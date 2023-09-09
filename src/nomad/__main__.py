@@ -3,6 +3,7 @@ import json
 import pathlib
 import sys
 from typing import Any
+from typing import Callable
 from typing import Generator
 from typing import List
 from typing import Tuple
@@ -133,6 +134,7 @@ def cache(ctx: click.Context) -> None:
 
 def get_cache_data(
     cache_dir: str = NOMAD_CACHE_DIR,
+    filter_func: Callable[[Any], bool] = lambda x: len(x) != 0,
 ) -> Generator[Tuple[pathlib.Path, List[Any]], None, None]:
     """Get all GIS JSON data from files in cache directory."""
     # get pathlib obj of cache data dir
@@ -142,8 +144,13 @@ def get_cache_data(
     for data_path in cache_path_obj.glob("**/*.json"):
         # open file
         with open(data_path, encoding="utf8") as data_file:
-            # generate dict of JSON data
-            yield (data_path, json.load(data_file))
+            # get JSON data
+            json_data = json.load(data_file)
+
+            # filter out
+            if filter_func(json_data):
+                # generate dict of JSON data
+                yield (data_path, json_data)
 
 
 @cache.command(
@@ -154,29 +161,24 @@ def get_cache_data(
 @click.pass_context
 def inspect_cache(ctx: click.Context) -> None:
     """Inspect contents of GIS data cache directory."""
+    # loop over data a filter it
     for data_path, data_list in get_cache_data():
-        # attempt to load
-        try:
-            # load it using json method
-            data = data_list[0]
+        # load it using json method
+        data = data_list[0]
 
-            # create title/contents for inspection dump case
-            title = f"Inspecting contents of cached file: {data_path}\n"
-            contents = ""
+        # create title/contents for inspection dump case
+        title = f"{'file_path':<12} {data_path}\n"
+        contents = ""
 
-            # loop over key/value pairs
-            for key, value in data.items():
-                # check type is not a list
-                if type(value) not in {dict, list}:
-                    # append key/value to contents
-                    contents += f"{key:<12} {value}\n"
+        # loop over key/value pairs
+        for key, value in data.items():
+            # check type is not a list
+            if type(value) not in {dict, list}:
+                # append key/value to contents
+                contents += f"{key:<12} {value}\n"
 
-            # one final newline
-            print(title + contents)
-
-        except IndexError:
-            # just an empty JSON file because query failed
-            pass
+        # one final newline
+        print(title + contents)
 
 
 if __name__ == "__main__":
