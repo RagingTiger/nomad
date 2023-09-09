@@ -1,6 +1,7 @@
 """Command-line interface."""
 import json
 import pathlib
+import re
 import sys
 from typing import Any
 from typing import Callable
@@ -179,6 +180,37 @@ def inspect_cache(ctx: click.Context) -> None:
 
         # one final newline
         print(title + contents)
+
+
+@cache.command(
+    "search",
+    no_args_is_help=True,
+    short_help="Search through JSON data in GIS data cache directory.",
+)
+@click.argument("query", type=str)
+@click.pass_context
+def search_cache(ctx: click.Context, query: str) -> None:
+    """Search through JSON data in GIS data cache directory."""
+    # iterate through files
+    for data_path, data_list in get_cache_data():
+        # load it using json method
+        data = data_list[0]
+
+        # create title/contents for inspection dump case
+        title = f"{'file_path':<12} {data_path}\n"
+        contents = ""
+
+        # loop over key/value pairs
+        for key, value in data.items():
+            # check type is not a list
+            if type(value) not in {dict, list}:
+                # append key/value to contents
+                contents += f"{key:<12} {value}\n"
+
+        # check if search matches
+        if re.search(query, contents, re.IGNORECASE):
+            # found match
+            print(title + contents)
 
 
 if __name__ == "__main__":
