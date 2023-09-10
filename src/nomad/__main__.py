@@ -38,7 +38,7 @@ def main(ctx: click.Context, dry_run: bool, debug: bool) -> None:
     # check for debugging
     if debug:
         # turn on console logging
-        osmnx.setting.log_level = logging.DEBUG
+        osmnx.settings.log_level = logging.DEBUG
         osmnx.settings.log_console = True
 
 
