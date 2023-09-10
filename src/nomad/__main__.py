@@ -115,7 +115,8 @@ def download(
     # get dry_run and debug info if any
     dry_run, debug = sync_main_flags(ctx)
 
-    # setting directory path/name
+    # make sure all cache settings are correct
+    osmnx.settings.use_cache = True
     osmnx.settings.cache_folder = download_dir
     osmnx.settings.cache_only_mode = True
 
