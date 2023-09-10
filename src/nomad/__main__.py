@@ -1,5 +1,6 @@
 """Command-line interface."""
 import json
+import logging
 import pathlib
 import re
 import sys
@@ -33,6 +34,12 @@ def main(ctx: click.Context, dry_run: bool, debug: bool) -> None:
     # update dry run key
     ctx.obj["DRY_RUN"] = dry_run
     ctx.obj["DEBUG"] = debug
+
+    # check for debugging
+    if debug:
+        # turn on console logging
+        osmnx.setting.log_level = logging.DEBUG
+        osmnx.settings.log_console = True
 
 
 def sync_main_flags(ctx: click.Context) -> Tuple[bool, bool]:
