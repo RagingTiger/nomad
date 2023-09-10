@@ -62,3 +62,13 @@ def test_help_by_default_succeeds(
 def test_default_cache_dir() -> None:
     """Sanity check for default caching directory."""
     assert osmnx.settings.cache_folder == __main__.NOMAD_CACHE_DIR
+
+
+@pytest.mark.slow
+def test_geocode_location_error(runner: CliRunner) -> None:
+    """Confirm geocode handles location errors correctly."""
+    # execute command
+    result = run_command(runner, "geocode", "laksdfljasdkfj")
+
+    # check output
+    assert "Nominatim could not geocode query" in result.output
