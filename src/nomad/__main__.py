@@ -134,6 +134,10 @@ def download(
 @click.pass_context
 def cache(ctx: click.Context) -> None:
     """Manage GIS data cache."""
+    # get dry_run and debug info if any
+    dry_run, debug = sync_main_flags(ctx)
+
+    # do nothing
     pass
 
 
@@ -169,6 +173,9 @@ def get_cache_data(
 @click.pass_context
 def inspect_cache(ctx: click.Context) -> None:
     """Inspect contents of GIS data cache directory."""
+    # get dry_run and debug info if any
+    dry_run, debug = sync_main_flags(ctx)
+
     # loop over data a filter it
     for data_path, data in get_cache_data():
         # create title/contents for inspection dump case
@@ -195,6 +202,9 @@ def inspect_cache(ctx: click.Context) -> None:
 @click.pass_context
 def search_cache(ctx: click.Context, query: str) -> None:
     """Search through JSON data in GIS data cache directory."""
+    # get dry_run and debug info if any
+    dry_run, debug = sync_main_flags(ctx)
+
     # iterate through files
     for data_path, data in get_cache_data():
         # create title/contents for inspection dump case
@@ -224,6 +234,9 @@ def search_cache(ctx: click.Context, query: str) -> None:
 @click.pass_context
 def remove_cache(ctx: click.Context, empty: bool, force: bool) -> None:
     """Remove select cached data from cache directory."""
+    # get dry_run and debug info if any
+    dry_run, debug = sync_main_flags(ctx)
+
     # check if empty is toggled
     if not empty:
         scope = "all cached data"
