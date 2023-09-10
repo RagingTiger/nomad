@@ -69,7 +69,7 @@ def test_default_cache_dir() -> None:
 def test_geocode_location_error(runner: CliRunner) -> None:
     """Confirm geocode handles location errors correctly."""
     # execute command
-    result = run_command(runner, "geocode", "!@#$%^&*")
+    result = run_command(runner, "-e", "geocode", "!@#$%^&*")
 
     # check output
     assert "Nominatim could not geocode query" in result.output
@@ -82,7 +82,7 @@ def test_download_location_error(runner: CliRunner, tmp_path: Path) -> None:
     cache_dir = tmp_path / "cache"
 
     # execute command
-    result = run_command(runner, "download", "-d", str(cache_dir), "!@#$%^&*")
+    result = run_command(runner, "-e", "download", "-d", str(cache_dir), "!@#$%^&*")
 
     # check output
     assert "could not be found" in result.output
@@ -95,10 +95,16 @@ def test_download_cache_dir(runner: CliRunner, tmp_path: Path) -> None:
     cache_dir = tmp_path / "cache"
 
     # execute command
-    _ = run_command(runner, "download", "-d", str(cache_dir), "!@#$%^&*")
+    _ = run_command(runner, "-e", "download", "-d", str(cache_dir), "!@#$%^&*")
 
     # check correct cache folder used
     assert osmnx.settings.cache_folder == str(cache_dir)
 
     # check cache only mode set
     assert osmnx.settings.cache_only_mode
+
+    # check cache dir exists
+    assert cache_dir.exists()
+
+    # check file was cached
+    assert tuple(cache_dir.glob("**/*.json"))
