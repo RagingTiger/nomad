@@ -1,4 +1,5 @@
 """Test cases for the __main__ module."""
+from pathlib import Path
 from typing import Optional
 from typing import Tuple
 
@@ -72,3 +73,32 @@ def test_geocode_location_error(runner: CliRunner) -> None:
 
     # check output
     assert "Nominatim could not geocode query" in result.output
+
+
+@pytest.mark.slow
+def test_download_location_error(runner: CliRunner, tmp_path: Path) -> None:
+    """Confirm download cmd handles location errors correctly."""
+    # get custom path
+    cache_dir = tmp_path / "cache"
+
+    # execute command
+    result = run_command(runner, "download", "-d", str(cache_dir), "laksdfljasdkfj")
+
+    # check output
+    assert "could not be found" in result.output
+
+
+@pytest.mark.slow
+def test_download_cache_dir(runner: CliRunner, tmp_path: Path) -> None:
+    """Confirm download cmd handles location errors correctly."""
+    # get custom path
+    cache_dir = tmp_path / "cache"
+
+    # execute command
+    _ = run_command(runner, "download", "-d", str(cache_dir), "laksdfljasdkfj")
+
+    # check correct cache folder used
+    assert osmnx.settings.cache_folder == str(cache_dir)
+
+    # check cache only mode set
+    assert osmnx.settings.cache_only_mode
